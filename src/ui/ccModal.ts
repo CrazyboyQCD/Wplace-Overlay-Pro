@@ -233,7 +233,7 @@ function closeCCModal() {
 }
 
 function weightedNearest(r: number, g: number, b: number, palette: number[][]) {
-  let best: number[] | null = null, bestDist = Infinity;
+  let best: [number, number, number] | null = null, bestDist = Infinity;
   for (let i = 0; i < palette.length; i++) {
     const [pr, pg, pb] = palette[i];
     const rmean = (pr + r) / 2;
@@ -266,11 +266,18 @@ function processImage() {
 
   const palette = getActivePalette();
   const counts: Record<string, number> = {};
+  const colorCache: Map<number, [number, number, number]> = new Map();
 
   for (let i = 0; i < src.length; i += 4) {
     const r = src[i], g = src[i+1], b = src[i+2], a = src[i+3];
     if (a === 0) { out[i]=0; out[i+1]=0; out[i+2]=0; out[i+3]=0; continue; }
-    const [nr, ng, nb] = palette.length ? weightedNearest(r,g,b,palette) : [r,g,b];
+    const color = (r<<24)|(g<<16)|(b<<8)|a;
+    let cached = colorCache.get(color);
+    if (!cached) {
+      cached = palette.length ? weightedNearest(r,g,b,palette) : [r,g,b];
+      colorCache.set(color, cached);
+    }
+    const [nr, ng, nb] = cached;
     out[i]=nr; out[i+1]=ng; out[i+2]=nb; out[i+3]=255;
     const key = `${nr},${ng},${nb}`;
     counts[key] = (counts[key] || 0) + 1;
