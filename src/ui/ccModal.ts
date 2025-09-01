@@ -243,7 +243,7 @@ function weightedNearest(r: number, g: number, b: number, palette: number[][]) {
     const x = (512 + rmean) * rdiff * rdiff >> 8;
     const y = 4 * gdiff * gdiff;
     const z = (767 - rmean) * bdiff * bdiff >> 8;
-    const dist = Math.sqrt(x + y + z);
+    const dist = x + y + z;
     if (dist < bestDist) { bestDist = dist; best = [pr, pg, pb]; }
   }
   return best || [0,0,0];
